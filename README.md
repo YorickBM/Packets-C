@@ -5,7 +5,20 @@ This repository contains a networking package system for C. This code can be use
 C socket networking consists of sending strings over the network. Since in large applications just interpreting strings is not most effective way. This can get very messy quickly i coded packets. These packets have an Id identifying the packet that they are, then you can write data to these packets using the functions: `writeInteger(Packet*, int)` & `writeString(Packet*, char*)`. 
 On receiving these packets a predefined callback function will be executed giving you the received packet as a paramater & the id of the client who has send the packet. In this callback you can then pop the data outside of the packet using: `popInteger(Packet*)` & `popString(Packet*)`. Note that the order you have writen them is the order you need to pop them!! 
 
-## How do i use it?
+A few things to keep in mind:
+- HEADER_SIZE (packet_reader.h) -> the size of the header (I.E. HEADER_SIZE 5 -> 99999 & HEADER_SIZE 2 -> 99)(HEADER_SIZE 5 allows 99999 characters and numbers 99999 digits long).
+- MAX_CHARACTERS (packet_reader.h) -> The amount of 9's from the result from above (If HEADER_SIZE = 3 then you put down 999).
+- CALLBACK_MAX (packet_reader.h) -> Max amount of packets you can register (Default: 25).
+- All packets must be an unique number & defined in packet_definitions.h
+- ID (socket_client.h) -> ID for the client, must be unique...
+- SERVER (socket_client.h) -> When defined socket will be setup as a server
+- MAX_NUM_CLIENTS (socket_client.h) -> Maxmium amount of unique clients connected, when exeted clients with the longest time no reaction will be overriden (No messages send of this to the client that gets disconnected).
+- MAX_CLIENT_MSG_LEN (socket_client.h) -> Maxmium size a packet can be in total!
+
+## How do I use it?
+To use this code, you just have to include 2 files into your files where you want to use them.
+You must include the packet_definitions.h & packet_reader.h. Down below is an incode depth of how to use it propperly. You can also look at the demo code provided.
+
 ### Create/Receive packet
 How to use it is straight forward, first in packet_definitions.h you have to define your packet. For example:
 ```c
@@ -55,6 +68,5 @@ void disconnect_packet_received(Packet packet, char* connection_id) { //As you c
 }
 ```
 
-### What to include?
-To use this code, you just have to include 2 files into your files where you want to use them.
-You must include the packet_definitions.h & packet_reader.h. Then you can use the functions as descrdibed above.
+## My own socket receiver? What now?
+When receiving data it is important to keep track of the socket & the custom id you have given this connection. How we have done this can be found in socket_client.c & socket_client.h. This is implemented ONLY for windows tho!!! If you have set up your own socket connections & threads. You can simply parse the received string with: `parse_packet(RECEIVED_DATA_FROM_SOCKET, connection.id);` To convert a packet to a string to send over the socket you can use: `construct_packet(packet)`
